@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────
+# Docker Compose — API Central Validador
+#
+# ⚠️  La base de datos MySQL NO se gestiona aquí.
+#     La API se conecta al MySQL del servidor host
+#     usando el DATABASE_URL definido en .env
+# ─────────────────────────────────────────────
+
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: validador-api
+    restart: unless-stopped
+
+    # Puerto: HOST:CONTENEDOR
+    # Se puede cambiar el puerto del host sin tocar el código
+    ports:
+      - "${PORT:-3000}:3000"
+
+    # Variables de entorno desde el archivo .env
+    env_file:
+      - .env
+
+    # Variables que se pueden sobrescribir
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+
+    # Para que el contenedor pueda conectarse al MySQL del host
+    # En Linux: host.docker.internal no siempre funciona,
+    # por eso se agrega extra_hosts como fallback
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Límites de recursos (ajustar según el servidor)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+    # Healthcheck: espera a que la API responda antes de marcarla como healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    # Logs: rotar para no llenar el disco
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    # Montar solo .env (no el código fuente en producción)
+    volumes:
+      - ./.env:/app/.env:ro

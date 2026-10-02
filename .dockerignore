@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────
+# .dockerignore — Archivos excluidos del build
+# ─────────────────────────────────────────────
+
+# Dependencias (se instalan dentro del contenedor)
+node_modules/
+
+# Build anterior
+dist/
+
+# Control de versiones
+.git/
+.gitignore
+
+# Variables de entorno (se pasan en tiempo de ejecución)
+.env
+.env.*
+!.env.example
+
+# Archivos de desarrollo
+*.log
+coverage/
+.nyc_output/
+
+# Archivos del IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests (no se necesitan en producción)
+test/
+**/*.spec.ts
+**/*.e2e-spec.ts
+jest-e2e.json
+
+# Documentación (no necesaria en la imagen)
+README.md
+docs/
+
+# Docker mismo
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# TypeScript fuente (solo se necesita el dist compilado)
+# No excluir src/ en el stage builder, solo en runner

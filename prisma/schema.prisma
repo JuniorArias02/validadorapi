@@ -1,0 +1,108 @@
+// Prisma Schema — API Central de Validación de Contactos
+// Base de datos: MySQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// API Claves — credenciales de acceso
+// ─────────────────────────────────────────────
+model ApiClave {
+  id           BigInt    @id @default(autoincrement())
+  nombre       String    @db.VarChar(100)
+  clave        String    @unique @db.VarChar(100)
+  secretoHash  String    @map("secreto_hash") @db.VarChar(255)
+  activa       Boolean   @default(true)
+  ultimoUso    DateTime? @map("ultimo_uso")
+  creadoEn     DateTime  @map("creado_en")
+  actualizadoEn DateTime @map("actualizado_en")
+
+  @@index([activa])
+  @@map("api_claves")
+}
+
+// ─────────────────────────────────────────────
+// Clientes — instancias del validador externo
+// ─────────────────────────────────────────────
+model Cliente {
+  id             BigInt    @id @default(autoincrement())
+  nombre         String    @db.VarChar(100)
+  identificador  String    @unique @db.VarChar(100)
+  activa         Boolean   @default(true)
+  ultimoLatido   DateTime? @map("ultimo_latido")
+  ultimoAcceso   DateTime? @map("ultimo_acceso")
+  creadoEn       DateTime  @map("creado_en")
+  actualizadoEn  DateTime  @map("actualizado_en")
+
+  validaciones Validacion[]
+
+  @@index([activa])
+  @@index([ultimoLatido])
+  @@map("clientes")
+}
+
+// ─────────────────────────────────────────────
+// Contactos — números a validar
+// ─────────────────────────────────────────────
+model Contacto {
+  id                BigInt    @id @default(autoincrement())
+  telefono          String    @unique @db.VarChar(20)
+  nombre            String?   @db.VarChar(150)
+  estadoWhatsapp    String    @default("desconocido") @map("estado_whatsapp") @db.VarChar(30)
+  estadoValidacion  String    @default("pendiente") @map("estado_validacion") @db.VarChar(30)
+  ultimaValidacion  DateTime? @map("ultima_validacion")
+  creadoEn          DateTime  @map("creado_en")
+  actualizadoEn     DateTime  @map("actualizado_en")
+
+  validaciones Validacion[]
+
+  @@index([estadoValidacion])
+  @@index([estadoWhatsapp])
+  @@index([ultimaValidacion])
+  @@map("contactos")
+}
+
+// ─────────────────────────────────────────────
+// Validaciones — trabajos de validación
+// ─────────────────────────────────────────────
+model Validacion {
+  id           BigInt    @id @default(autoincrement())
+  contactoId   BigInt    @map("contacto_id")
+  clienteId    BigInt    @map("cliente_id")
+  estado       String    @default("pendiente") @db.VarChar(30)
+  respuesta    Json?
+  intentos     Int       @default(1)
+  iniciadoEn   DateTime? @map("iniciado_en")
+  finalizadoEn DateTime? @map("finalizado_en")
+  creadoEn     DateTime  @map("creado_en")
+  actualizadoEn DateTime @map("actualizado_en")
+
+  contacto Contacto @relation(fields: [contactoId], references: [id])
+  cliente  Cliente  @relation(fields: [clienteId], references: [id])
+
+  @@index([contactoId])
+  @@index([clienteId])
+  @@index([estado])
+  @@index([creadoEn])
+  @@map("validaciones")
+}
+
+// ─────────────────────────────────────────────
+// Usuarios — administradores del dashboard
+// ─────────────────────────────────────────────
+model Usuario {
+  id           BigInt    @id @default(autoincrement())
+  usuario      String    @unique @db.VarChar(150)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  nombre       String    @db.VarChar(100)
+  creadoEn     DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime @default(now()) @updatedAt @map("actualizado_en")
+
+  @@map("usuarios")
+}

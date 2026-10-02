@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Compilados
+dist/
+build/
+
+# Entornos y Secretos
+.env
+.env.test
+.env.production
+numeros.txt
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Prisma
+*.db
+*.db-journal
+
+# OS y Editores
+.DS_Store
+.idea/
+.vscode/
+*.swp
