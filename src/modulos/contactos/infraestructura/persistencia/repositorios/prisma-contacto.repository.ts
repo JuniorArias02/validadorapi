@@ -90,6 +90,9 @@ export class PrismaContactoRepository implements ContactoRepository {
       ...(filtros.estadoWhatsapp && {
         estadoWhatsapp: filtros.estadoWhatsapp,
       }),
+      ...(filtros.telefono && {
+        telefono: { contains: filtros.telefono },
+      }),
     };
 
     const [registros, total] = await this.prisma.$transaction([

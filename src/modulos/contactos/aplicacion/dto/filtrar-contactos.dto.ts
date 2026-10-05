@@ -17,6 +17,10 @@ export class FiltrarContactosDto {
   estadoWhatsapp?: EstadoWhatsApp;
 
   @IsOptional()
+  @IsString()
+  telefono?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
